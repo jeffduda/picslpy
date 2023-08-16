@@ -1,0 +1,66 @@
+import SimpleITK as sitk
+import numpy as np
+import itk
+import vtk
+import utilities as util
+
+img = sitk.ReadImage("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/2_AX_NC_5_0_THICK_AP.nii")
+sitk.WriteImage(img, "/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/orig.mha")
+min_bounds = img.TransformIndexToPhysicalPoint((0,0,0))
+max_bounds = img.TransformIndexToPhysicalPoint((img.GetWidth()-1,img.GetHeight()-1,img.GetDepth()-1))
+bounds = [min_bounds[0], max_bounds[0], min_bounds[1], max_bounds[1], min_bounds[2], max_bounds[2]]
+
+itk_bounds.extend(max_bound)
+
+arr = sitk.GetArrayFromImage(img)
+fimg = sitk.GetImageFromArray(np.flip(arr,1))
+fimg.SetSpacing(img.GetSpacing())
+fimg.SetOrigin(img.GetOrigin())
+fimg.SetDirection(img.GetDirection())
+sitk.WriteImage(fimg, "/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/flipped.mha")
+
+print(img.GetDirection())
+
+range = sitk.ReadImage("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/range.nii.gz")
+v_range = util.image2vtk(range)
+range_mesh = util.smooth_mesh(util.label2mesh(v_range, 1), relaxation=0.3)
+
+liver = sitk.ReadImage("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/2_AX_NC_5_0_THICK_AP_liver.nii.gz")
+v_liver = util.image2vtk(liver)
+liver_mesh = util.smooth_mesh(util.label2mesh(v_liver, 1), relaxation=0.3)
+v_bounds = v_liver.GetBounds()
+y_range = bounds[3]-bounds[2]
+
+spleen = sitk.ReadImage("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/2_AX_NC_5_0_THICK_AP_spleen.nii.gz")
+v_spleen = util.image2vtk(spleen)
+spleen_mesh = util.smooth_mesh(util.label2mesh(v_spleen, 1), relaxation=0.3)
+
+fats = sitk.ReadImage("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/2_AX_NC_5_0_THICK_AP_fats.nii.gz")
+visceral = fats==1
+subq = fats==2
+
+v_visceral = util.image2vtk(visceral)
+visceral_mesh = util.smooth_mesh(util.label2mesh(v_visceral, 1), relaxation=0.3)
+v_subq = util.image2vtk(subq)
+subq_mesh = util.smooth_mesh(util.label2mesh(v_subq, 1), relaxation=0.3)
+
+writer = vtk.vtkPolyDataWriter()
+writer.SetInputData(liver_mesh)
+writer.SetFileName("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/liver_mesh_new.vtk")
+writer.Write()
+
+writer.SetInputData(spleen_mesh)
+writer.SetFileName("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/spleen_mesh_new.vtk")
+writer.Write()
+
+writer.SetInputData(visceral_mesh)
+writer.SetFileName("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/visceral_mesh_new.vtk")
+writer.Write()
+
+writer.SetInputData(subq_mesh)
+writer.SetFileName("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/subq_mesh_new.vtk")
+writer.Write()
+
+writer.SetInputData(range_mesh)
+writer.SetFileName("/Users/jtduda/53051586/processed/2_AX_NC_5_0_THICK_AP/range_mesh.vtk")
+writer.Write()
