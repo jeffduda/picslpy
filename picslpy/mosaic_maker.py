@@ -49,7 +49,6 @@ def make_html(png_list, filename):
 def image_to_tiles(image, size, columns):
     # Get image size
     img_size = image.GetSize()
-    print(img_size)
 
     # Get number of rows
     slices = int(img_size[2])
@@ -74,9 +73,6 @@ def image_to_tiles(image, size, columns):
     out_spacing = [image.GetSpacing()[0] / tile_scale, image.GetSpacing()[1] / tile_scale]
     out_origin = [image.GetOrigin()[0], image.GetOrigin()[1]]
 
-    print(size)
-    print(out_size)
-
     for i in range(slices):
         # Get slice
         islice = image[:,:,i]
@@ -89,7 +85,7 @@ def image_to_tiles(image, size, columns):
         else:
             islice = sitk.Cast(islice, sitk.sitkUInt8)  
         
-        sitk.WriteImage(islice, "slice_"+str(i)+".png")
+        #sitk.WriteImage(islice, "slice_"+str(i)+".png")
 
         resample = sitk.Resample(islice, out_size, sitk.Transform(), sitk.sitkLinear, out_origin, out_spacing, islice.GetDirection(), 0.0, pix_type)
 
@@ -111,6 +107,7 @@ def main():
     parser.add_argument('-m', '--minmax', help="Intensity scale using min and max", required=False, default=False, action='store_true')
     parser.add_argument('-a', '--align', help="Set voxel ordering", required=False, default='')
     parser.add_argument('-H', '--html', help="Create html file", required=False, default='')
+    parser.add_argument('-v', '--verbose', help="Verbose output", required=False, default=False, action='store_true')
     parser.add_argument('input', nargs='+', help='Input filename')
     args = parser.parse_args()
 
@@ -124,6 +121,9 @@ def main():
     # Load images
     out_image=True
     for f in args.input:
+
+        if args.verbose:
+            print(f)
 
         out_base = os.path.basename(f)
         file_base = out_base.split(".")[0]
