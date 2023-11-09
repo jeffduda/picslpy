@@ -85,7 +85,9 @@ def image_to_tiles(image, size, columns):
         pix_type=sitk.sitkUInt8
         if islice.GetNumberOfComponentsPerPixel() > 1:
             pix_type=sitk.sitkVectorUInt8
-            islice = sitk.Cast(islice, pix_type)        
+            islice = sitk.Cast(islice, pix_type)      
+        else:
+            islice = sitk.Cast(islice, sitk.sitkUInt8)  
         
         sitk.WriteImage(islice, "slice_"+str(i)+".png")
 
@@ -101,7 +103,7 @@ def image_to_tiles(image, size, columns):
 
 def main():
     parser = argparse.ArgumentParser(prog='mosaic_maker', description='Tile volume slices')
-    parser.add_argument('-o', '--output', help='Input filename', required=True)
+    parser.add_argument('-o', '--output', help='Output directory', required=True)
     parser.add_argument('-s', '--size', help='Size of each slice', nargs=2, required=False, type=int, default=[128,128])
     parser.add_argument('-g', '--gap', help='Gap between slices', required=False, type=int, default=0)
     parser.add_argument('-c', '--columns', help='Number of columns', required=False, default=0, type=int)
@@ -165,7 +167,7 @@ def main():
             idx += 1
 
             iscaled = img3
-            print(img3.GetNumberOfComponentsPerPixel())
+            #print(img3.GetNumberOfComponentsPerPixel())
 
             if img3.GetNumberOfComponentsPerPixel() == 1:
 
