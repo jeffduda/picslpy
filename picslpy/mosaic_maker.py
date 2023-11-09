@@ -96,8 +96,6 @@ def image_to_tiles(image, size, columns):
 
         out[out_index[0]:(out_index[0]+out_size[0]), out_index[1]:(out_index[1]+out_size[1])]=resample
 
-    print(out.GetNumberOfComponentsPerPixel())
-
     return out          
 
 
@@ -105,6 +103,7 @@ def main():
     parser = argparse.ArgumentParser(prog='mosaic_maker', description='Tile volume slices')
     parser.add_argument('-o', '--output', help='Input filename', required=True)
     parser.add_argument('-s', '--size', help='Size of each slice', nargs=2, required=False, type=int, default=[128,128])
+    parser.add_argument('-g', '--gap', help='Gap between slices', required=False, type=int, default=0)
     parser.add_argument('-c', '--columns', help='Number of columns', required=False, default=0, type=int)
     parser.add_argument('-w', '--window_level', help="Intensity window and level", nargs=2, required=False, default=None)
     parser.add_argument('-m', '--minmax', help="Intensity scale using min and max", required=False, default=False, action='store_true')
@@ -146,11 +145,7 @@ def main():
 
         if img.GetDimension() > 4:
             print("skipping "   + f + " as it is not 3D or 4D")
-            continue            
-
-        #if img.GetDimension() < 3:
-        #    print("skipping "   + f + " as it is not 3D or 4D")
-        #    continue            
+            continue             
 
         col = args.columns
         if col == 0:
